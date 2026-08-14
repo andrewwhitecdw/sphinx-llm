@@ -162,7 +162,13 @@ def test_markdown_generator_init(sphinx_build):
 
 
 def test_markdown_generator_setup(sphinx_build):
-    """Test that setup connects to the correct events."""
+    """Test that setup wires the full event chain.
+
+    ``setup`` only registers ``builder-inited``; the actual ``doctree-read``
+    and ``build-finished`` hooks are connected from the ``builder-inited``
+    handler (``build_llms_txt``).  Firing that handler verifies the complete
+    registration path and catches regressions that drop the later hooks.
+    """
     app, _, _ = sphinx_build
     generator = MarkdownGenerator(app)
 
@@ -176,8 +182,20 @@ def test_markdown_generator_setup(sphinx_build):
     app.connect = record_connect
     generator.setup()
 
-    events = [call[0] for call in connect_calls]
-    assert "builder-inited" in events
+    entry_events = {call[0] for call in connect_calls}
+    assert "builder-inited" in entry_events
+
+    # Trigger the builder-inited handler so it can wire the remaining hooks.
+    builder_inited_callback = next(
+        callback for event, callback in connect_calls if event == "builder-inited"
+    )
+    builder_inited_callback(app)
+
+    events = {call[0] for call in connect_calls}
+    required = {"builder-inited", "doctree-read", "build-finished"}
+    assert required.issubset(events), (
+        f"Expected setup chain to connect {required}, missing from {events}"
+    )
 
 
 def test_combine_builds_with_exception(sphinx_build):
