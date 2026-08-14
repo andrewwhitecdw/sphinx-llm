@@ -53,6 +53,9 @@ class _ToctreeLinkParser(HTMLParser):
         self._div_depth -= 1
 
 
+# Shared docs source directory used by integration tests.
+_DOCS_SOURCE_DIR = Path(__file__).parent.parent.parent.parent / "docs" / "source"
+
 def _build_sphinx(
     builder: str, confoverrides: dict | None = None
 ) -> Generator[tuple[Sphinx, Path, Path], None, None]:
@@ -61,7 +64,7 @@ def _build_sphinx(
     Yields:
         Tuple of (Sphinx app, temporary build directory path, source directory path)
     """
-    docs_source_dir = Path(__file__).parent.parent.parent.parent / "docs" / "source"
+    docs_source_dir = _DOCS_SOURCE_DIR
     overrides = {"llms_txt_build_parallel": True}
     if confoverrides:
         overrides.update(confoverrides)
@@ -689,7 +692,7 @@ def test_llms_txt_disabled(builder):
     in build_llms_txt happens, combine_builds is never connected
     to build-finished, and its call count stays at zero.
     """
-    docs_source_dir = Path(__file__).parent.parent.parent.parent / "docs" / "source"
+    docs_source_dir = _DOCS_SOURCE_DIR
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
@@ -939,7 +942,7 @@ def test_html_meta_description_used_in_incremental_build():
     descriptions only during doctree-read would silently fall back to the
     content-based description in this scenario.
     """
-    docs_source_dir = Path(__file__).parent.parent.parent.parent / "docs" / "source"
+    docs_source_dir = _DOCS_SOURCE_DIR
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
