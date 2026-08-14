@@ -203,8 +203,10 @@ class MarkdownGenerator:
             logger.info("Skipping markdown build because the primary build failed")
             return
 
-        # Create temporary markdown build directory
-        self.md_build_dir.mkdir(exist_ok=True)
+        # Create temporary markdown build directory.  The parent output directory
+        # may not exist yet (e.g. during the builder-inited event), so create
+        # any missing parents as well.
+        self.md_build_dir.mkdir(parents=True, exist_ok=True)
         self.md_build_logfile = tempfile.NamedTemporaryFile(
             mode="w", delete=False, prefix="sphinx_llm_output_", suffix=".log"
         )
