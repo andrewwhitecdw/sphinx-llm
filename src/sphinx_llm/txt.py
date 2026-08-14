@@ -687,7 +687,14 @@ class MarkdownGenerator:
     def _get_docname_from_md_file(self, md_file: Path) -> str:
         """Return the Sphinx docname for a markdown build output file."""
         rel_path = md_file.relative_to(self.md_build_dir)
-        return rel_path.with_suffix("").as_posix()
+        suffixes = rel_path.suffixes
+        if suffixes[-2:] == [".html", ".md"]:
+            name = rel_path.name[: -len(".html.md")]
+        elif suffixes[-1:] == [".md"]:
+            name = rel_path.name[: -len(".md")]
+        else:
+            name = rel_path.name
+        return (rel_path.parent / name).as_posix()
 
     def get_page_description(self, md_file: Path) -> str:
         """Get a brief description of the page content.
