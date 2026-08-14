@@ -21,7 +21,7 @@ import tempfile
 from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
-from importlib.metadata import PackageNotFoundError, metadata
+from importlib.metadata import metadata
 from pathlib import Path
 from typing import Any
 
@@ -579,8 +579,10 @@ class MarkdownGenerator:
             meta_description = metadata(project_title).get("Description")
             if meta_description:
                 return meta_description
-        except PackageNotFoundError:
-            pass
+        except Exception:
+            logger.exception(
+                "Failed to look up package metadata for '%s'", project_title
+            )
 
         if hasattr(self.app.config, "html_title") and self.app.config.html_title:
             return self.app.config.html_title
