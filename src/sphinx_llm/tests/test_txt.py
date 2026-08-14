@@ -181,10 +181,10 @@ def test_markdown_generator_setup(sphinx_build):
 
 
 def test_combine_builds_with_exception(sphinx_build):
-    """Test that combine_builds returns early on exception."""
+    """Test that combine_builds returns None when an exception occurred."""
     app, _, _ = sphinx_build
     generator = MarkdownGenerator(app)
-    generator.combine_builds(app, Exception("fail"))
+    assert generator.combine_builds(app, Exception("fail")) is None
 
 
 def test_combine_builds_terminates_orphan_subprocess_on_exception(sphinx_build):
